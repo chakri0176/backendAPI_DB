@@ -1,14 +1,35 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from bson import ObjectId
 from ..utils.helpers import serialize_doc
 
-bp = Blueprint('species', __name__, url_prefix='/species')
+app = Blueprint('species', __name__, url_prefix='/species')
 
-@bp.route('/', methods=['GET'])
+# CRUD Operations for Species_info
+@app.route('/species', methods=['GET'])
 def get_species():
     species_list = []
     for species in current_app.db['Species_info'].find():
         species_list.append(serialize_doc(species))
     return jsonify(species_list), 200
 
-# Add other species routes here...
+@app.route('/species', methods=['POST'])
+def add_species():
+    new_species = request.json
+    result = current_app.db['Species_info'].insert_one(new_species)
+    return jsonify({"message": "Species added", "id": str(result.inserted_id)}), 201
+
+@app.route('/species/<id>', methods=['GET'])
+def get_species_by_id(id):
+    species = current_app.db['Species_info'].find_one({"_id": ObjectId(id)})
+    return jsonify(serialize_doc(species)) if species else jsonify({"message": "Species not found"}), 404
+
+@app.route('/species/<id>', methods=['PUT'])
+def update_species(id):
+    updated_data = request.json
+    result = current_app.db['Species_info'].update_one({"_id": ObjectId(id)}, {"$set": updated_data})
+    return jsonify({"message": "Species updated"}), 200 if result.modified_count > 0 else 404
+
+@app.route('/species/<id>', methods=['DELETE'])
+def delete_species(id):
+    result = current_app.db['Species_info'].delete_one({"_id": ObjectId(id)})
+    return jsonify({"message": "Species deleted"}), 200 if result.deleted_count > 0 else 404
