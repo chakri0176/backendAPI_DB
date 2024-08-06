@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, jsonify, request
 from bson import ObjectId
 from ..utils.helpers import serialize_doc
 
-app = Blueprint('species', __name__, url_prefix='/species')
+app = Blueprint('health', __name__, url_prefix='/health')
 
 
 # CRUD Operations for Animal_health
