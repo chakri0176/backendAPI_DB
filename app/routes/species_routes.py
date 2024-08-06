@@ -17,31 +17,31 @@ def test_connection():
         return jsonify({"message": "Connection failed", "error": str(e)}), 500
 
 # CRUD Operations for Species_info
-@app.route('/species', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_species():
     species_list = []
     for species in current_app.db['Species_info'].find():
         species_list.append(serialize_doc(species))
     return jsonify(species_list), 200
 
-@app.route('/species', methods=['POST'])
+@app.route('/', methods=['POST'])
 def add_species():
     new_species = request.json
     result = current_app.db['Species_info'].insert_one(new_species)
     return jsonify({"message": "Species added", "id": str(result.inserted_id)}), 201
 
-@app.route('/species/<id>', methods=['GET'])
+@app.route('/<id>', methods=['GET'])
 def get_species_by_id(id):
     species = current_app.db['Species_info'].find_one({"_id": ObjectId(id)})
     return jsonify(serialize_doc(species)) if species else jsonify({"message": "Species not found"}), 404
 
-@app.route('/species/<id>', methods=['PUT'])
+@app.route('/<id>', methods=['PUT'])
 def update_species(id):
     updated_data = request.json
     result = current_app.db['Species_info'].update_one({"_id": ObjectId(id)}, {"$set": updated_data})
     return jsonify({"message": "Species updated"}), 200 if result.modified_count > 0 else 404
 
-@app.route('/species/<id>', methods=['DELETE'])
+@app.route('/<id>', methods=['DELETE'])
 def delete_species(id):
     result = current_app.db['Species_info'].delete_one({"_id": ObjectId(id)})
     return jsonify({"message": "Species deleted"}), 200 if result.deleted_count > 0 else 404
