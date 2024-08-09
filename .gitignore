@@ -1,7 +1,7 @@
 .env
 .venv/
 
-app/utils/__pycache__/
-app/routes/__pycache__/
-app/models/__pycache__/
-app/__pycache__/
+backend/app/utils/__pycache__/
+backend/app/routes/__pycache__/
+backend/app/models/__pycache__/
+backend/app/__pycache__/
