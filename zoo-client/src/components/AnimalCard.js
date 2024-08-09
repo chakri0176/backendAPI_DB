@@ -13,6 +13,14 @@ const AnimalCard = ({ animal }) => {
         <span className="text-5xl">{getAnimalEmoji(animal.Species_name)}</span>
       </div>
       <div className="p-4">
+        {/* Display animal image */}
+        <div className="mb-4">
+          <img
+            src={animal.Species_image_url}
+            alt={`${animal.Species_name}`}
+            className="w-full h-auto object-cover rounded-lg"
+          />
+        </div>
         <p className="text-gray-800">
           <strong>Species:</strong> {animal.Species_name}
         </p>
