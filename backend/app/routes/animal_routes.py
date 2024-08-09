@@ -9,7 +9,28 @@ app = Blueprint('animals', __name__, url_prefix='/animals')
 def get_animals():
     animals_list = []
     for animal in current_app.db['Animal_info'].find():
-        animals_list.append(serialize_doc(animal))
+        animal_data = serialize_doc(animal)
+
+        # Fetch species information
+        species = current_app.db['Species_info'].find_one({"Species_name": animal_data['Species_name']})
+        if species:
+            animal_data['Species_info'] = serialize_doc(species)
+
+        # Fetch enclosure information
+        enclosure = current_app.db['Enclosure_info'].find_one({"Enclosure_name": animal_data['Current_animal_location']})
+        if enclosure:
+            animal_data['Enclosure_info'] = serialize_doc(enclosure)
+
+        # Fetch feeding records
+        feeding_records = current_app.db['Animal_feeding'].find({"Animal_id": animal_data['_id']})
+        animal_data['Feeding_records'] = [serialize_doc(record) for record in feeding_records]
+
+        # Fetch health records
+        health_records = current_app.db['Animal_health'].find({"Animal_id": animal_data['_id']})
+        animal_data['Health_records'] = [serialize_doc(record) for record in health_records]
+
+        animals_list.append(animal_data)
+
     return jsonify(animals_list), 200
 
 @app.route('/', methods=['POST'])
