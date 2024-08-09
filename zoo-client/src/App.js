@@ -4,6 +4,7 @@ import AnimalCard from './components/AnimalCard';
 import SearchBar from './components/SearchBar';
 import useFetchAnimals from './hooks/useFetchAnimals';
 import './App.css';
+import Footer from './components/Footer';
 
 function App() {
   const { animals, loading, error } = useFetchAnimals();
@@ -39,7 +40,8 @@ function App() {
             <AnimalCard key={animal._id} animal={animal} />
           ))}
         </div>
-      </main>
+            </main>
+        <Footer/>
     </div>
   );
 }
