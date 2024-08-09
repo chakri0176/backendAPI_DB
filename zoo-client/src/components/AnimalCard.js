@@ -7,7 +7,7 @@ const AnimalCard = ({ animal }) => {
   const toggleExpand = () => setExpanded(!expanded);
 
   return (
-    <div className="bg-yellow-100 rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105">
+    <div className="bg-yellow-50 rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105">
       <div className="bg-green-400 p-4 flex items-center justify-between">
         <h2 className="text-3xl font-bold text-white">{animal.Animal_name}</h2>
         <span className="text-5xl">{getAnimalEmoji(animal.Species_name)}</span>
