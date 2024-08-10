@@ -95,9 +95,8 @@ const AnimalCard = ({ animal }) => {
               <p className="text-gray-800">
                 <strong>
                   {new Date(
-                    animal.Health_records[0].Health_event_time
+                    animal.Health_records[0].Health_check_date
                   ).toLocaleDateString()}
-                  :
                 </strong>{" "}
                 {animal.Health_records[0].Health_event_type} -{" "}
                 {animal.Health_records[0].Health_event_comments}
