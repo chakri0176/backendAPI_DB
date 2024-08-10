@@ -30,6 +30,24 @@ def add_species():
     result = current_app.db['Species_info'].insert_one(new_species)
     return jsonify({"message": "Species added", "id": str(result.inserted_id)}), 201
 
+@app.route('/list', methods=['POST'])
+def add_species_list():
+    species_list = request.json
+    
+    if not isinstance(species_list, list):
+        return jsonify({"message": "Invalid input, expected a list of species"}), 400
+    
+    if not all(isinstance(species, dict) for species in species_list):
+        return jsonify({"message": "Invalid input, all items should be dictionaries"}), 400
+    
+    # Insert each species into the database
+    ids = []
+    for species in species_list:
+        result = current_app.db['Species_info'].insert_one(species)
+        ids.append(str(result.inserted_id))
+    
+    return jsonify({"message": "Species added", "ids": ids}), 201
+
 @app.route('/<id>', methods=['GET'])
 def get_species_by_id(id):
     species = current_app.db['Species_info'].find_one({"_id": ObjectId(id)})
