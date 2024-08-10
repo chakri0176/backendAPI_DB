@@ -4,6 +4,11 @@ from ..utils.helpers import serialize_doc
 
 app = Blueprint('animals', __name__, url_prefix='/animals')
 
+# Utility function to insert a document and return the inserted ID
+def insert_document(collection_name, document):
+    result = current_app.db[collection_name].insert_one(document)
+    return str(result.inserted_id)
+
 # CRUD Operations for Animal_info
 @app.route('/', methods=['GET'])
 def get_animals():
@@ -34,68 +39,73 @@ def get_animals():
     return jsonify(animals_list), 200
 
 @app.route('/add_animal', methods=['POST'])
-def add_animal():
+def insert_animal():
     data = request.json
 
-    # Insert into Species_info if not already present
+    # Insert or update Species_info
     species_query = {"Species_name": data["Species_name"]}
-    species = current_app.db["Species_info"].find_one(species_query)
+    species_data = {
+        "Species_name": data["Species_name"],
+        "Species_type": data["Species_info"]["Species_type"],
+        "Species_lifespan": data["Species_info"]["Species_lifespan"],
+        "Food_type": data["Species_info"]["Food_type"],
+        "Species_image_url": data["Species_info"]["Species_image_url"]
+    }
+    species = current_app.db["Species_info"].find_one_and_update(
+        species_query, {"$set": species_data}, upsert=True, return_document=True
+    )
+    species_id = str(species["_id"])
 
-    if not species:
-        species_data = {
-            "Species_name": data["Species_name"],
-            "Species_type": data["Species_type"],
-            "Species_lifespan": data["Species_lifespan"],
-            "Food_type": data["Food_type"]
-        }
-        species_id = insert_document("Species_info", species_data)
-    else:
-        species_id = str(species["_id"])
+    # Insert or update Enclosure_info
+    enclosure_query = {"Enclosure_name": data["Enclosure_info"]["Enclosure_name"]}
+    enclosure_data = {
+        "Enclosure_name": data["Enclosure_info"]["Enclosure_name"],
+        "Animal_capacity": data["Enclosure_info"]["Animal_capacity"],
+        "Current_population": data["Enclosure_info"]["Current_population"],
+        "Enclosure_condition": data["Enclosure_info"]["Enclosure_condition"],
+        "Enclosure_location": data["Enclosure_info"]["Enclosure_location"]
+    }
+    enclosure = current_app.db["Enclosure_info"].find_one_and_update(
+        enclosure_query, {"$set": enclosure_data}, upsert=True, return_document=True
+    )
+    enclosure_id = str(enclosure["_id"])
 
-    # Insert into Enclosure_info if not already present
-    enclosure_query = {"Enclosure_name": data["Enclosure_name"]}
-    enclosure = current_app.db["Enclosure_info"].find_one(enclosure_query)
-
-    if not enclosure:
-        enclosure_data = {
-            "Enclosure_name": data["Enclosure_name"],
-            "Enclosure_type": data["Enclosure_type"],
-            "Enclosure_capacity": data["Enclosure_capacity"]
-        }
-        enclosure_id = insert_document("Enclosure_info", enclosure_data)
-    else:
-        enclosure_id = str(enclosure["_id"])
-
-    # Insert into Animal_info
+    # Insert Animal_info
     animal_data = {
-        "Species_id": ObjectId(species_id),
+        "Species_name": data["Species_name"],
         "Animal_name": data["Animal_name"],
         "Animal_sex": data["Animal_sex"],
-        "Animal_birthdate": datetime.strptime(data["Animal_birthdate"], "%Y-%m-%d"),
-        "Current_animal_location": ObjectId(enclosure_id)
+        "Animal_birthdate": datetime.strptime(data["Animal_birthdate"], "%Y-%m-%dT%H:%M:%S"),
+        "Current_animal_location": data["Current_animal_location"],
+        "Enclosure_info": ObjectId(enclosure_id),
+        "Species_info": ObjectId(species_id)
     }
-    animal_id = insert_document("Animal_info", animal_data)
+    animal_id = current_app.db["Animal_info"].insert_one(animal_data).inserted_id
 
-    # Insert into Animal_feeding
-    feeding_data = {
-        "Animal_id": ObjectId(animal_id),
-        "Feeding_action_type": data["Feeding_action_type"],
-        "Food_time": datetime.strptime(data["Food_time"], "%Y-%m-%dT%H:%M:%S.%f"),
-        "Food_type": data["Food_type"],
-        "Food_weight": data["Food_weight"]
-    }
-    insert_document("Animal_feeding", feeding_data)
+    # Insert Feeding_records
+    for feeding_record in data["Feeding_records"]:
+        feeding_data = {
+            "Animal_id": animal_id,
+            "Feeding_action_type": feeding_record["Feeding_action_type"],
+            "Food_time": datetime.strptime(feeding_record["Food_time"], "%Y-%m-%dT%H:%M:%S.%f"),
+            "Food_type": feeding_record["Food_type"],
+            "Food_weight": feeding_record["Food_weight"],
+            "Species_name": feeding_record["Species_name"]
+        }
+        current_app.db["Feeding_records"].insert_one(feeding_data)
 
-    # Insert into Animal_health
-    health_data = {
-        "Animal_id": ObjectId(animal_id),
-        "Health_event_type": data["Health_event_type"],
-        "Health_event_time": datetime.strptime(data["Health_event_time"], "%a, %d %b %Y %H:%M:%S GMT"),
-        "Health_event_comments": data["Health_event_comments"]
-    }
-    insert_document("Animal_health", health_data)
+    # Insert Health_records
+    for health_record in data["Health_records"]:
+        health_data = {
+            "Animal_id": animal_id,
+            "Health_check_date": datetime.strptime(health_record["Health_check_date"], "%Y-%m-%dT%H:%M:%S"),
+            "Health_notes": health_record["Health_notes"],
+            "Health_status": health_record["Health_status"],
+            "Species_name": health_record["Species_name"]
+        }
+        current_app.db["Health_records"].insert_one(health_data)
 
-    return jsonify({"message": "Animal and related records added successfully", "Animal_id": animal_id}), 201
+    return jsonify({"message": "Animal and related records added successfully", "Animal_id": str(animal_id)}), 201
 
 @app.route('/', methods=['POST'])
 def add_animal():
