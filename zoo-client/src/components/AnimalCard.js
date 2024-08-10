@@ -16,7 +16,7 @@ const AnimalCard = ({ animal }) => {
         {/* Display animal image */}
         <div className="mb-4">
           <img
-            src={animal.Species_image_url}
+            src={animal.Species_info.Species_image_url}
             alt={`${animal.Species_name}`}
             className="w-full h-auto object-cover rounded-lg"
           />

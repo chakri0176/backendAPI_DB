@@ -7,16 +7,17 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import AddAnimal from './routes/AddForm';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />
   },
-  // {
-  //   path: '/add-animal',
-  //   element: <AddAnimal />
-  // }
+  {
+    path: '/add-animal',
+    element: <AddAnimal />
+  }
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

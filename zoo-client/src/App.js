@@ -29,7 +29,9 @@ function App() {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-white">Zoo Keeper</h1>
           <nav>
-            <button className="bg-white text-green-500 px-4 py-2 rounded-full font-semibold hover:bg-green-100 transition-colors duration-300">Dashboard</button>
+            <button
+              onClick={() => window.location.href = '/add-animal'}
+              className="bg-white text-green-500 px-4 py-2 rounded-full font-semibold hover:bg-green-100 transition-colors duration-300">Add Animals</button>
           </nav>
         </div>
       </header>
@@ -40,8 +42,8 @@ function App() {
             <AnimalCard key={animal._id} animal={animal} />
           ))}
         </div>
-            </main>
-        <Footer/>
+      </main>
+      <Footer />
     </div>
   );
 }
